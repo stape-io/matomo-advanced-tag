@@ -55,10 +55,12 @@ if (data.requestHeaders && data.requestHeaders.length) {
 if (isLoggingEnabled) {
   logToConsole(
     JSON.stringify({
-      Name: 'MatomoTag',
+      Name: 'MatomoAdvancedTag',
       Type: 'Request',
       TraceId: traceId,
       EventName: eventName,
+      RequestMethod: 'POST',
+      RequestUrl: postUrl,
     })
   );
 }
@@ -71,7 +73,7 @@ sendHttpRequest(postUrl, {
     if (isLoggingEnabled) {
       logToConsole(
         JSON.stringify({
-          Name: 'MatomoTag',
+          Name: 'MatomoAdvancedTag',
           Type: 'Response',
           TraceId: traceId,
           EventName: eventName,
