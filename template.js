@@ -119,7 +119,12 @@ function determinateIsLoggingEnabled() {
 
 function getMatomoParams() {
   const visitorId = eventData.client_id
-    ? sha256Sync(eventData.client_id).slice(0, 16)
+    ? sha256Sync(eventData.client_id.split('.').join(''))
+        .split(']')
+        .join('')
+        .split('[')
+        .join('')
+        .slice(0, 16)
     : '';
   const matomoParams = {
     // Required parameters
@@ -158,8 +163,16 @@ function getMatomoParams() {
     search: '',
     search_cat: '',
     search_count: '',
-    pv_id: '',
-    idgoal: '',
+    pv_id: eventData['x-ga-page_id'],
+    idgoal:
+      eventData.value ||
+      eventData.transaction_id ||
+      eventData.items ||
+      eventData.tax ||
+      eventData.shipping ||
+      eventData.discount_amount
+        ? 0
+        : '',
     revenue: eventData.value,
     gt_ms: '',
     cs: '',
@@ -174,10 +187,11 @@ function getMatomoParams() {
     pf_onl: '',
 
     // Optional Event Tracking info
-    e_c: '',
-    e_a: '',
-    e_n: '',
-    e_v: '',
+    e_c: eventData.event_category,
+    e_a: eventData.event_action,
+    e_n: eventData.event_category && eventData.event_action ? eventName : '',
+    e_v:
+      eventData.event_category && eventData.event_action ? eventData.value : '',
 
     // Optional Content Tracking info
     c_n: '',
