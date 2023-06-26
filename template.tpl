@@ -88,6 +88,13 @@ ___TEMPLATE_PARAMETERS___
     "valueHint": "Defaults to event.event_name"
   },
   {
+    "type": "CHECKBOX",
+    "name": "useOptimisticScenario",
+    "checkboxText": "Use Optimistic Scenario",
+    "simpleValueType": true,
+    "help": "The tag will call gtmOnSuccess() without waiting for a response from the API"
+  },
+  {
     "type": "GROUP",
     "name": "eventParametersGroup",
     "displayName": "Event Parameters",
@@ -328,10 +335,12 @@ sendHttpRequest(postUrl, {
         })
       );
     }
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
+    if(!data.useOptimisticScenario) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        data.gtmOnSuccess();
+      } else {
+        data.gtmOnFailure();
+      }
     }
   })
   .catch(() => {
