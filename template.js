@@ -83,10 +83,12 @@ sendHttpRequest(postUrl, {
         })
       );
     }
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      data.gtmOnSuccess();
-    } else {
-      data.gtmOnFailure();
+    if(!data.useOptimisticScenario) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        data.gtmOnSuccess();
+      } else {
+        data.gtmOnFailure();
+      }
     }
   })
   .catch(() => {
