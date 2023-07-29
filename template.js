@@ -7,31 +7,21 @@ const JSON = require('JSON');
 const Object = require('Object');
 const sendHttpRequest = require('sendHttpRequest');
 const getType = require('getType');
-const makeString = require('makeString');
 const sha256Sync = require('sha256Sync');
 
-const containerVersion = getContainerVersion();
-const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = getRequestHeader('trace-id');
+const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
+
 const eventData = getAllEventData();
-const eventName = data.eventName ? data.eventName : eventData.event_name;
+const eventNameData = getEventNameData();
+const eventName = eventNameData.e_n;
+
 let postUrl = data.trackingUrl;
-const params = getMatomoParams();
-
-if (data.redactVisitorIP && makeString(data.redactVisitorIP) !== 'false') {
-  params.cip = encodeUriComponent('::');
-}
-
-if (data.parametersToExclude && data.parametersToExclude.length) {
-  data.parametersToExclude.forEach((param) => {
-    Object.delete(params, param.name);
-  });
-}
+const params = getMatomoParams(eventNameData);
 
 if (data.parametersToOverride && data.parametersToOverride.length) {
   data.parametersToOverride.forEach((param) => {
-    if (isValidParam(params[param.name]) || param.addParam) {
+    if (isValidParam(params[param.name])) {
       params[param.name] = param.value;
     }
   });
@@ -61,6 +51,7 @@ if (isLoggingEnabled) {
       EventName: eventName,
       RequestMethod: 'POST',
       RequestUrl: postUrl,
+      RequestHeaders: headers,
     })
   );
 }
@@ -104,6 +95,12 @@ function objectToQueryString(obj) {
 }
 
 function determinateIsLoggingEnabled() {
+  const containerVersion = getContainerVersion();
+  const isDebug = !!(
+    containerVersion &&
+    (containerVersion.debugMode || containerVersion.previewMode)
+  );
+
   if (!data.logType) {
     return isDebug;
   }
@@ -119,7 +116,30 @@ function determinateIsLoggingEnabled() {
   return data.logType === 'always';
 }
 
-function getMatomoParams() {
+function getEventNameData() {
+  if (data.eventType === 'inherit') {
+    if (eventData.event_name === 'page_view') {
+      return {
+        'e_c': '',
+        'e_a': '',
+        'e_n': eventData.event_name
+      };
+    }
+    return {
+      'e_c': eventData.event_category,
+      'e_a': eventData.event_action,
+      'e_n': eventData.event_name
+    };
+  } else {
+    return {
+      'e_c': data.eventCategory,
+      'e_a': data.eventAction,
+      'e_n': data.eventName,
+    };
+  }
+}
+
+function getMatomoParams(eventNameData) {
   const visitorId = eventData.client_id
     ? sha256Sync(eventData.client_id.split('.').join(''))
         .split(']')
@@ -128,13 +148,14 @@ function getMatomoParams() {
         .join('')
         .slice(0, 16)
     : '';
+
   const matomoParams = {
     // Required parameters
-    idsite: data.idsite,
+    idsite: data.siteId,
     rec: 1,
 
     // Recommended parameters
-    action_name: eventName,
+    action_name: eventNameData.e_n === 'page_view' ? eventData.page_title : eventNameData.e_a,
     url: eventData.page_location,
     _id: visitorId,
     rand: eventData['x-ga-page_id'],
@@ -149,8 +170,8 @@ function getMatomoParams() {
     cookie: '',
     ua: eventData.user_agent,
     uadata: '',
-    lang: eventData.language,
-    uid: eventData.user_id,
+    lang: eventData.lang || eventData.language,
+    uid: eventData.uid || eventData.user_id,
     cid: visitorId,
     new_visit: '',
 
@@ -160,21 +181,13 @@ function getMatomoParams() {
 
     // Optional Action info
     cvar: '',
-    link: eventData.page_location,
+    link: '',
     download: '',
-    search: '',
+    search: eventData.search || eventData.search_term,
     search_cat: '',
     search_count: '',
     pv_id: eventData['x-ga-page_id'],
-    idgoal:
-      eventData.value ||
-      eventData.transaction_id ||
-      eventData.items ||
-      eventData.tax ||
-      eventData.shipping ||
-      eventData.discount_amount
-        ? 0
-        : '',
+    idgoal: data.enableEcommerceTracking ? 0 : '',
     revenue: eventData.value,
     gt_ms: '',
     cs: '',
@@ -188,12 +201,11 @@ function getMatomoParams() {
     pf_dm2: '',
     pf_onl: '',
 
-    // Optional Event Tracking info
-    e_c: eventData.event_category,
-    e_a: eventData.event_action,
-    e_n: eventData.event_category && eventData.event_action ? eventName : '',
-    e_v:
-      eventData.event_category && eventData.event_action ? eventData.value : '',
+    // Event Tracking info
+    e_c: eventNameData.e_c,
+    e_a: eventNameData.e_a,
+    e_n: eventNameData.e_n,
+    e_v: eventNameData.e_n === 'page_view' ? '' : eventData.value,
 
     // Optional Content Tracking info
     c_n: '',
@@ -202,7 +214,7 @@ function getMatomoParams() {
     c_i: '',
 
     // Optional Ecommerce info
-    ec_id: eventData.transaction_id,
+    ec_id: eventData.ec_id || eventData.transaction_id,
     ec_items: eventData.items
       ? JSON.stringify(
           eventData.items.map((item) => [
@@ -220,8 +232,8 @@ function getMatomoParams() {
     ec_dt: eventData.discount_amount,
 
     // Other parameters
-    token_auth: data.token_auth,
-    cip: data.token_auth ? eventData.ip_override : '',
+    token_auth: data.tokenAuth,
+    cip: data.tokenAuth ? eventData.ip_override : '',
     cdt: '',
     country: '',
     region: '',
@@ -244,6 +256,7 @@ function getMatomoParams() {
     ma_fs: '',
     ma_se: '',
   };
+
   return Object.keys(matomoParams).reduce((acc, key) => {
     if (isValidParam(matomoParams[key])) {
       acc[key] = matomoParams[key];
