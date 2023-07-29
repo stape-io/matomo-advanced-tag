@@ -1,4 +1,6 @@
 homepage: 'https://stape.io/'
 versions:
+  - sha: 91d7b74ad9555bd2ef0140016fcb66036f20ea22
+    changeNotes: Add event name generation.
   - sha: d6ab0d2112a47e3c63d53da46ad19d20210fd29b
     changeNotes: Initial release.
