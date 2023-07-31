@@ -17,6 +17,10 @@ const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
 
 let postUrl = data.trackingUrl;
+if (postUrl.indexOf('matomo.php', postUrl.length - 10) === -1) {
+  postUrl = postUrl + 'matomo.php';
+}
+
 const params = getMatomoParams(eventNameData);
 
 if (data.parametersToOverride && data.parametersToOverride.length) {
@@ -118,13 +122,14 @@ function determinateIsLoggingEnabled() {
 
 function getEventNameData() {
   if (data.eventType === 'inherit') {
-    if (eventData.event_name === 'page_view') {
+    if (eventData.event_name === 'page_view' || eventData.event_name === 'Data' || !eventData.event_name) {
       return {
         'e_c': '',
         'e_a': '',
-        'e_n': eventData.event_name
+        'e_n': 'page_view'
       };
     }
+
     return {
       'e_c': eventData.event_category,
       'e_a': eventData.event_action,
@@ -139,67 +144,93 @@ function getEventNameData() {
   }
 }
 
-function getMatomoParams(eventNameData) {
-  const visitorId = eventData.client_id
-    ? sha256Sync(eventData.client_id.split('.').join(''))
-        .split(']')
-        .join('')
-        .split('[')
-        .join('')
-        .slice(0, 16)
+function getECItems() {
+  if (eventData.ec_items) {
+    return eventData.ec_items;
+  }
+
+  return eventData.items
+    ? JSON.stringify(
+      eventData.items.map((item) => [
+        item.item_id,
+        item.item_name,
+        item.item_category,
+        item.price,
+        item.quantity
+      ])
+    )
     : '';
+}
+
+function getVisitorId() {
+  if (eventData['_id']) {
+    return eventData['_id'];
+  }
+
+  return eventData.client_id
+    ? sha256Sync(eventData.client_id.split('.').join(''))
+      .split(']')
+      .join('')
+      .split('[')
+      .join('')
+      .slice(0, 16)
+    : '';
+}
+
+function getMatomoParams(eventNameData) {
+  const visitorId = getVisitorId();
 
   const matomoParams = {
     // Required parameters
     idsite: data.siteId,
-    rec: 1,
+    rec: eventData.rec || 1,
 
     // Recommended parameters
-    action_name: eventNameData.e_n === 'page_view' ? eventData.page_title : eventNameData.e_a,
-    url: eventData.page_location,
+    action_name: eventNameData.e_n === 'page_view' ? (eventData.page_title || eventData.action_name) : eventNameData.e_a,
+    url: eventData.page_location || eventData.url,
     _id: visitorId,
     rand: eventData['x-ga-page_id'],
-    apiv: 1,
+    apiv: eventData.apiv || 1,
 
     // Optional User info
-    urlref: eventData.page_referrer,
-    res: eventData.screen_resolution,
-    h: '',
-    m: '',
-    s: '',
-    cookie: '',
+    urlref: eventData.page_referrer || eventData.urlref || eventData.referrer,
+    res: eventData.screen_resolution || eventData.res,
+    h: eventData.h,
+    m: eventData.m,
+    s: eventData.s,
+    cookie: eventData.cookie,
     ua: eventData.user_agent,
-    uadata: '',
+    uadata: eventData.uadata,
     lang: eventData.lang || eventData.language,
     uid: eventData.uid || eventData.user_id,
     cid: visitorId,
-    new_visit: '',
+    new_visit: eventData.new_visit,
 
     // Acquisition Channel Attribution
-    _rcn: eventData.affiliation,
-    _rck: '',
+    _rcn: eventData.affiliation || eventData['_rcn'],
+    _rck: eventData['_rck'],
 
     // Optional Action info
-    cvar: '',
-    link: '',
-    download: '',
+    cvar: eventData.cvar,
+    link: eventData.link,
+    download: eventData.download,
     search: eventData.search || eventData.search_term,
-    search_cat: '',
-    search_count: '',
+    search_cat: eventData.search_cat,
+    search_count: eventData.search_count,
     pv_id: eventData['x-ga-page_id'],
     idgoal: data.enableEcommerceTracking ? 0 : '',
-    revenue: eventData.value,
-    gt_ms: '',
-    cs: '',
-    ca: '',
+    revenue: eventData.revenue || eventData.value,
+    gt_ms: eventData.gt_ms,
+    cs: eventData.cs,
+    // ca: eventData.ca, // Not supported
 
     // Page Performance Info
-    pf_net: '',
-    pf_srv: '',
-    pf_tfr: '',
-    pf_dm1: '',
-    pf_dm2: '',
-    pf_onl: '',
+    pf_net: eventData.pf_net,
+    pf_srv: eventData.pf_srv,
+    pf_tfr: eventData.pf_tfr,
+    pf_dm1: eventData.pf_dm1,
+    pf_dm2: eventData.pf_dm2,
+    pf_onl: eventData.pf_onl,
 
     // Event Tracking info
     e_c: eventNameData.e_c,
@@ -208,53 +239,43 @@ function getMatomoParams(eventNameData) {
     e_v: eventNameData.e_n === 'page_view' ? '' : eventData.value,
 
     // Optional Content Tracking info
-    c_n: '',
-    c_p: '',
-    c_t: '',
-    c_i: '',
+    c_n: eventData.c_n,
+    c_p: eventData.c_p,
+    c_t: eventData.c_t,
+    c_i: eventData.c_i,
 
     // Optional Ecommerce info
     ec_id: eventData.ec_id || eventData.transaction_id,
-    ec_items: eventData.items
-      ? JSON.stringify(
-          eventData.items.map((item) => [
-            item.item_id,
-            item.item_name,
-            item.item_category,
-            item.price,
-            item.quantity,
-          ])
-        )
-      : '',
-    ec_st: eventData.value,
-    ec_tx: eventData.tax,
-    ec_sh: eventData.shipping,
-    ec_dt: eventData.discount_amount,
+    ec_items: getECItems(),
+    ec_st: eventData.value || eventData.ec_st,
+    ec_tx: eventData.ec_tx || eventData.tax,
+    ec_sh: eventData.ec_sh || eventData.shipping,
+    ec_dt: eventData.ec_dt || eventData.discount_amount,
 
     // Other parameters
     token_auth: data.tokenAuth,
-    cip: data.tokenAuth ? eventData.ip_override : '',
-    cdt: '',
-    country: '',
-    region: '',
-    city: '',
-    lat: '',
-    long: '',
+    cip: data.tokenAuth ? (eventData.cip || eventData.ip_override) : '',
+    cdt: eventData.cdt,
+    country: eventData.country,
+    region: eventData.region,
+    city: eventData.city,
+    lat: eventData.lat,
+    long: eventData.long,
 
     // Media Analytics
-    ma_id: '',
-    ma_ti: '',
-    ma_re: '',
-    ma_mt: '',
-    ma_pn: '',
-    ma_st: '',
-    ma_le: '',
-    ma_ps: '',
-    ma_ttp: '',
-    ma_w: '',
-    ma_h: '',
-    ma_fs: '',
-    ma_se: '',
+    ma_id: eventData.ma_id,
+    ma_ti: eventData.ma_ti,
+    ma_re: eventData.ma_re,
+    ma_mt: eventData.ma_mt,
+    ma_pn: eventData.ma_pn,
+    ma_st: eventData.ma_st,
+    ma_le: eventData.ma_le,
+    ma_ps: eventData.ma_ps,
+    ma_ttp: eventData.ma_ttp,
+    ma_w: eventData.ma_w,
+    ma_h: eventData.ma_h,
+    ma_fs: eventData.ma_fs,
+    ma_se: eventData.ma_se,
   };
 
   return Object.keys(matomoParams).reduce((acc, key) => {
