@@ -1,5 +1,7 @@
 homepage: 'https://stape.io/'
 versions:
+  - sha: b50adc0aa8f18a3995a2a6bae17601c6299bccdb
+    changeNotes: Add support of web matomo tag.
   - sha: 91d7b74ad9555bd2ef0140016fcb66036f20ea22
     changeNotes: Add event name generation.
   - sha: d6ab0d2112a47e3c63d53da46ad19d20210fd29b
