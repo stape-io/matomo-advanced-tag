@@ -1,30 +1,35 @@
 # Matomo Advanced tag for Google Tag Manager Server Side
 
-Matomo Advanced provides an ability to send events to Matomo using Measurement Protocol. 
-There are few key features provided by current tag:
-- Ability to override parameters
-- Auth token support
-- Compatible with Google Analytics 4 Measurement Protocol
+Matomo Advanced Tag automatically parses event data in the server Google Tag Manager container and tries to map it to standard events or e-commerce tracking.
+
+Event set-up methods:
+- Inherit from client. The tag will automatically parse event data and map available data.
+- Custom. With the help of this method, you can track pageviews and other custom events by adding event category, event action, and event name.
+
+Types of actions that server-side Matomo tag supports:
+- pageview
+- event tracking
+- e-commerce tracking
 
 ## How to use the Matomo Advanced tag:
 
-1. Create a Matomo Advanced tag and add GA4 triggers
-2. Provide Required parameters (Tracking url and Matomo site ID)
 
-**Tracking url** - Provide your Matomo tracking url. For example: https://your-matomo-domain.com/matomo.php
+**Tracking URL** - Tracking HTTP API endpoint, for example, https://your-matomo-domain.example/matomo.php
 
-**Matomo site ID** - Provide your Matomo site ID. For example: 1
+**Matomo site ID** - The ID of the website you want to set up tracking for. To find the tracking ID click on the gear button in the top right corner, click Websites, then manage and you will find the site ID in Manage Measurables table.
 
-**Redact visitor IP address** - Remove visitor IP address from the event. Reports based on the event will not include geographic information.
+**Auth token** - AuthToken is used to set the correct IP Address. Available In Matomo under Settings > Personal > Security > Auth Token. Optional (if it isn’t set, the IP & Region displayed in Matomo will be incorrect).
 
-**Event Name** - The event name to send to Matomo. If this field is blank, the value of the event_name parameter will be sent.
+**Enable E-commerce Tracking** - Tag will try to map ecommerce data.
 
-**Event Parameters** - Specify which parameters you want to include by default, add overwrites or remove existing.
+**Use Optimistic Scenario** - The tag will call gtmOnSuccess() without waiting for a response from the API.
 
-**Logs Settings** - Specify whether the tag should write to the logs.
+**Event Parameters** - Here, you can specify which parameters you want to override.
 
+**Request Headers** - Add the request headers name and value you want to add to the Matomo requests.
 
-### Useful links:
+**Logs Settings** - Specify whether the tag should write to the logs to stape.
+
 
 ## Open Source
 
