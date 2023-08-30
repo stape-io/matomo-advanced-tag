@@ -78,7 +78,7 @@ sendHttpRequest(postUrl, {
         })
       );
     }
-    if(!data.useOptimisticScenario) {
+    if (!data.useOptimisticScenario) {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         data.gtmOnSuccess();
       } else {
@@ -87,8 +87,14 @@ sendHttpRequest(postUrl, {
     }
   })
   .catch(() => {
-    data.gtmOnFailure();
+    if (!data.useOptimisticScenario) {
+      data.gtmOnFailure();
+    }
   });
+
+if (data.useOptimisticScenario) {
+  data.gtmOnSuccess();
+}
 
 function objectToQueryString(obj) {
   return Object.keys(obj)
@@ -122,24 +128,28 @@ function determinateIsLoggingEnabled() {
 
 function getEventNameData() {
   if (data.eventType === 'inherit') {
-    if (eventData.event_name === 'page_view' || eventData.event_name === 'Data' || !eventData.event_name) {
+    if (
+      eventData.event_name === 'page_view' ||
+      eventData.event_name === 'Data' ||
+      !eventData.event_name
+    ) {
       return {
-        'e_c': '',
-        'e_a': '',
-        'e_n': 'page_view'
+        e_c: '',
+        e_a: '',
+        e_n: 'page_view',
       };
     }
 
     return {
-      'e_c': eventData.event_category,
-      'e_a': eventData.event_action,
-      'e_n': eventData.event_name
+      e_c: eventData.event_category,
+      e_a: eventData.event_action,
+      e_n: eventData.event_name,
     };
   } else {
     return {
-      'e_c': data.eventCategory,
-      'e_a': data.eventAction,
-      'e_n': data.eventName,
+      e_c: data.eventCategory,
+      e_a: data.eventAction,
+      e_n: data.eventName,
     };
   }
 }
@@ -151,14 +161,14 @@ function getECItems() {
 
   return eventData.items
     ? JSON.stringify(
-      eventData.items.map((item) => [
-        item.item_id,
-        item.item_name,
-        item.item_category,
-        item.price,
-        item.quantity
-      ])
-    )
+        eventData.items.map((item) => [
+          item.item_id,
+          item.item_name,
+          item.item_category,
+          item.price,
+          item.quantity,
+        ])
+      )
     : '';
 }
 
@@ -169,11 +179,11 @@ function getVisitorId() {
 
   return eventData.client_id
     ? sha256Sync(eventData.client_id.split('.').join(''))
-      .split(']')
-      .join('')
-      .split('[')
-      .join('')
-      .slice(0, 16)
+        .split(']')
+        .join('')
+        .split('[')
+        .join('')
+        .slice(0, 16)
     : '';
 }
 
@@ -186,7 +196,10 @@ function getMatomoParams(eventNameData) {
     rec: eventData.rec || 1,
 
     // Recommended parameters
-    action_name: eventNameData.e_n === 'page_view' ? (eventData.page_title || eventData.action_name) : eventNameData.e_a,
+    action_name:
+      eventNameData.e_n === 'page_view'
+        ? eventData.page_title || eventData.action_name
+        : eventNameData.e_a,
     url: eventData.page_location || eventData.url,
     _id: visitorId,
     rand: eventData['x-ga-page_id'],
@@ -254,7 +267,7 @@ function getMatomoParams(eventNameData) {
 
     // Other parameters
     token_auth: data.tokenAuth,
-    cip: data.tokenAuth ? (eventData.cip || eventData.ip_override) : '',
+    cip: data.tokenAuth ? eventData.cip || eventData.ip_override : '',
     cdt: eventData.cdt,
     country: eventData.country,
     region: eventData.region,
