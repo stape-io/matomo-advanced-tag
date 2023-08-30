@@ -1,5 +1,7 @@
 homepage: 'https://stape.io/'
 versions:
+  - sha: 56deec2a17a7f145c28481b58a23a1133b0af255
+    changeNotes: Fix optimistic scenario.
   - sha: b50adc0aa8f18a3995a2a6bae17601c6299bccdb
     changeNotes: Add support of web matomo tag.
   - sha: 91d7b74ad9555bd2ef0140016fcb66036f20ea22
