@@ -30,7 +30,8 @@ Types of actions that server-side Matomo tag supports:
 
 **Logs Settings** - Specify whether the tag should write to the logs to stape.
 
-
+## Useful link:
+- https://stape.io/blog/matomo-tag-for-server-google-tag-manager 
 ## Open Source
 
 Matomo Advanced Tag for GTM Server Side is developed and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
