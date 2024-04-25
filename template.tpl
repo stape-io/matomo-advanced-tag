@@ -275,7 +275,7 @@ const params = getMatomoParams(eventNameData);
 
 if (data.parametersToOverride && data.parametersToOverride.length) {
   data.parametersToOverride.forEach((param) => {
-    if (isValidParam(params[param.name])) {
+    if (isValidParam(param.value)) {
       params[param.name] = param.value;
     }
   });
