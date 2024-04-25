@@ -1,5 +1,7 @@
 homepage: 'https://stape.io/'
 versions:
+  - sha: 2db0e8ac59cabe856fba360ad41916c8dd2ffee9
+    changeNotes: Fix params override.
   - sha: 56deec2a17a7f145c28481b58a23a1133b0af255
     changeNotes: Fix optimistic scenario.
   - sha: b50adc0aa8f18a3995a2a6bae17601c6299bccdb
