@@ -1,4 +1,5 @@
 homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/matomo-advanced-tag'
 versions:
   - sha: 2db0e8ac59cabe856fba360ad41916c8dd2ffee9
     changeNotes: Fix params override.
