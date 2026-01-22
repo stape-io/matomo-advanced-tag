@@ -17,13 +17,16 @@ const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
 const eventData = getAllEventData();
 const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
-
 let postUrl = data.trackingUrl;
+const params = getMatomoParams(eventNameData);
+
+if (!isConsentGivenOrNotRequired()) {
+  return data.gtmOnSuccess();
+}
+
 if (postUrl.indexOf('matomo.php', postUrl.length - 10) === -1) {
   postUrl = postUrl + 'matomo.php';
 }
-
-const params = getMatomoParams(eventNameData);
 
 if (data.parametersToOverride && data.parametersToOverride.length) {
   data.parametersToOverride.forEach((param) => {
@@ -284,6 +287,13 @@ function getMatomoParams(eventNameData) {
 /*==============================================================================
   Helpers
 ==============================================================================*/
+
+function isConsentGivenOrNotRequired() {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
+}
 
 function isValidParam(value) {
   const valueType = getType(value);
