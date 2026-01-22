@@ -1,7 +1,7 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/matomo-advanced-tag'
 versions:
-  - sha: 490b46f2c1be9db34d39d8dfc0c567c969027a3d1
+  - sha: dbd424cbb390e23b6b95d1ef2c99625a620a39cd
     changeNotes: Fix action_name for page_view event.
   - sha: 2db0e8ac59cabe856fba360ad41916c8dd2ffee9
     changeNotes: Fix params override.
