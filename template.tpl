@@ -30,124 +30,132 @@ ___TEMPLATE_PARAMETERS___
 
 [
   {
-    "type": "RADIO",
-    "name": "eventType",
-    "displayName": "Event Name Setup Method",
-    "radioItems": [
+    "type": "GROUP",
+    "name": "configGroup",
+    "displayName": "",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
       {
-        "value": "inherit",
-        "displayValue": "Inherit from client"
-      },
-      {
-        "value": "custom",
-        "displayValue": "Custom",
-        "subParams": [
+        "type": "RADIO",
+        "name": "eventType",
+        "displayName": "Event Name Setup Method",
+        "radioItems": [
           {
-            "type": "RADIO",
-            "name": "eventTypeCustom",
-            "radioItems": [
+            "value": "inherit",
+            "displayValue": "Inherit from client"
+          },
+          {
+            "value": "custom",
+            "displayValue": "Custom",
+            "subParams": [
               {
-                "value": "pageView",
-                "displayValue": "Page View"
-              },
-              {
-                "value": "event",
-                "displayValue": "Event",
-                "subParams": [
+                "type": "RADIO",
+                "name": "eventTypeCustom",
+                "radioItems": [
                   {
-                    "type": "TEXT",
-                    "name": "eventCategory",
-                    "displayName": "Event Category",
-                    "simpleValueType": true,
-                    "valueValidators": [
-                      {
-                        "type": "NON_EMPTY"
-                      }
-                    ]
+                    "value": "pageView",
+                    "displayValue": "Page View"
                   },
                   {
-                    "type": "TEXT",
-                    "name": "eventAction",
-                    "displayName": "Event Action",
-                    "simpleValueType": true,
-                    "valueValidators": [
+                    "value": "event",
+                    "displayValue": "Event",
+                    "subParams": [
                       {
-                        "type": "NON_EMPTY"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "TEXT",
-                    "name": "eventName",
-                    "displayName": "Event Name",
-                    "simpleValueType": true,
-                    "valueValidators": [
+                        "type": "TEXT",
+                        "name": "eventCategory",
+                        "displayName": "Event Category",
+                        "simpleValueType": true,
+                        "valueValidators": [
+                          {
+                            "type": "NON_EMPTY"
+                          }
+                        ]
+                      },
                       {
-                        "type": "NON_EMPTY"
+                        "type": "TEXT",
+                        "name": "eventAction",
+                        "displayName": "Event Action",
+                        "simpleValueType": true,
+                        "valueValidators": [
+                          {
+                            "type": "NON_EMPTY"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "TEXT",
+                        "name": "eventName",
+                        "displayName": "Event Name",
+                        "simpleValueType": true,
+                        "valueValidators": [
+                          {
+                            "type": "NON_EMPTY"
+                          }
+                        ]
                       }
                     ]
                   }
-                ]
+                ],
+                "simpleValueType": true
               }
-            ],
-            "simpleValueType": true
+            ]
+          }
+        ],
+        "simpleValueType": true,
+        "defaultValue": "inherit"
+      },
+      {
+        "type": "TEXT",
+        "name": "trackingUrl",
+        "displayName": "Tracking URL",
+        "simpleValueType": true,
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          },
+          {
+            "type": "REGEX",
+            "args": [
+              "^https://.*"
+            ]
+          },
+          {
+            "type": "REGEX",
+            "args": [
+              ".*\\/$"
+            ]
           }
         ]
-      }
-    ],
-    "simpleValueType": true,
-    "defaultValue": "inherit"
-  },
-  {
-    "type": "TEXT",
-    "name": "trackingUrl",
-    "displayName": "Tracking URL",
-    "simpleValueType": true,
-    "valueValidators": [
-      {
-        "type": "NON_EMPTY"
       },
       {
-        "type": "REGEX",
-        "args": [
-          "^https://.*"
-        ]
+        "type": "TEXT",
+        "name": "siteId",
+        "displayName": "Matomo Site ID",
+        "simpleValueType": true,
+        "help": "The ID of the website we\u0027re tracking a visit/action for."
       },
       {
-        "type": "REGEX",
-        "args": [
-          ".*\\/$"
-        ]
+        "type": "TEXT",
+        "name": "tokenAuth",
+        "displayName": "Auth Token",
+        "simpleValueType": true,
+        "canBeEmptyString": true,
+        "help": "AuthToken used to set the correct IP Address. Available In Matomo under Settings \u003e Personal \u003e Security \u003e Auth Token. Optional (if it isn\u0027t set the IP \u0026 Region displayed in Matomo will be incorrect)"
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "enableEcommerceTracking",
+        "checkboxText": "Enable Ecommerce Tracking",
+        "simpleValueType": true
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "useOptimisticScenario",
+        "checkboxText": "Use Optimistic Scenario",
+        "simpleValueType": true,
+        "help": "The tag will call gtmOnSuccess() without waiting for a response from the API"
       }
     ]
-  },
-  {
-    "type": "TEXT",
-    "name": "siteId",
-    "displayName": "Matomo Site ID",
-    "simpleValueType": true,
-    "help": "The ID of the website we\u0027re tracking a visit/action for."
-  },
-  {
-    "type": "TEXT",
-    "name": "tokenAuth",
-    "displayName": "Auth Token",
-    "simpleValueType": true,
-    "canBeEmptyString": true,
-    "help": "AuthToken used to set the correct IP Address. Available In Matomo under Settings \u003e Personal \u003e Security \u003e Auth Token. Optional (if it isn\u0027t set the IP \u0026 Region displayed in Matomo will be incorrect)"
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "enableEcommerceTracking",
-    "checkboxText": "Enable Ecommerce Tracking",
-    "simpleValueType": true
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "useOptimisticScenario",
-    "checkboxText": "Use Optimistic Scenario",
-    "simpleValueType": true,
-    "help": "The tag will call gtmOnSuccess() without waiting for a response from the API"
   },
   {
     "type": "GROUP",
@@ -222,7 +230,7 @@ ___TEMPLATE_PARAMETERS___
     "subParams": [
       {
         "type": "RADIO",
-        "name": "adStorageConsent",
+        "name": "analyticsStorageConsent",
         "radioItems": [
           {
             "value": "optional",
@@ -230,8 +238,8 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "value": "required",
-            "displayValue": "Send data in case marketing consent given",
-            "help": "Aborts the tag execution if marketing consent (\u003ci\u003ead_storage\u003c/i\u003e Google Consent Mode or Stape\u0027s Data Tag parameter) is not given."
+            "displayValue": "Send data in case analytics consent is provided",
+            "help": "Aborts the tag execution if analytics (\u003ci\u003eanalytics_storage\u003c/i\u003e Google Consent Mode or Stape\u0027s Data Tag parameter) is not given."
           }
         ],
         "simpleValueType": true,
@@ -287,6 +295,10 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
+if (!isConsentGivenOrNotRequired()) {
+  return data.gtmOnSuccess();
+}
+
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
 const eventData = getAllEventData();
@@ -294,10 +306,6 @@ const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
 let postUrl = data.trackingUrl;
 const params = getMatomoParams(eventNameData);
-
-if (!isConsentGivenOrNotRequired()) {
-  return data.gtmOnSuccess();
-}
 
 if (postUrl.indexOf('matomo.php', postUrl.length - 10) === -1) {
   postUrl = postUrl + 'matomo.php';
@@ -564,10 +572,11 @@ function getMatomoParams(eventNameData) {
 ==============================================================================*/
 
 function isConsentGivenOrNotRequired() {
-  if (data.adStorageConsent !== 'required') return true;
-  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
-  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
-  return xGaGcs[2] === '1';
+  if (data.analyticsStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.analytics_storage;
+  // x-ga-gcs is a string like "G110": G1{ad_storage}{analytics_storage}
+  const xGaGcs = eventData['x-ga-gcs'] || ''; 
+  return xGaGcs[3] === '1';
 }
 
 function isValidParam(value) {

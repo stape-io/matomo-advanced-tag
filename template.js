@@ -12,6 +12,10 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
+if (!isConsentGivenOrNotRequired()) {
+  return data.gtmOnSuccess();
+}
+
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
 const eventData = getAllEventData();
@@ -19,10 +23,6 @@ const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
 let postUrl = data.trackingUrl;
 const params = getMatomoParams(eventNameData);
-
-if (!isConsentGivenOrNotRequired()) {
-  return data.gtmOnSuccess();
-}
 
 if (postUrl.indexOf('matomo.php', postUrl.length - 10) === -1) {
   postUrl = postUrl + 'matomo.php';
@@ -289,10 +289,10 @@ function getMatomoParams(eventNameData) {
 ==============================================================================*/
 
 function isConsentGivenOrNotRequired() {
-  if (data.adStorageConsent !== 'required') return true;
-  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
-  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
-  return xGaGcs[2] === '1';
+  if (data.analyticsStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.analytics_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110": G1{ad_storage}{analytics_storage}
+  return xGaGcs[3] === '1';
 }
 
 function isValidParam(value) {
