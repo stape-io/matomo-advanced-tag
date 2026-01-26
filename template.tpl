@@ -238,7 +238,7 @@ ___TEMPLATE_PARAMETERS___
           },
           {
             "value": "required",
-            "displayValue": "Send data in case analytics consent is provided",
+            "displayValue": "Send data in case analytics consent is given",
             "help": "Aborts the tag execution if analytics (\u003ci\u003eanalytics_storage\u003c/i\u003e Google Consent Mode or Stape\u0027s Data Tag parameter) is not given."
           }
         ],
@@ -295,13 +295,14 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
-if (!isConsentGivenOrNotRequired()) {
+const eventData = getAllEventData();
+
+if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
-const eventData = getAllEventData();
 const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
 let postUrl = data.trackingUrl;

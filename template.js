@@ -12,13 +12,14 @@ const sha256Sync = require('sha256Sync');
 /*==============================================================================
 ==============================================================================*/
 
-if (!isConsentGivenOrNotRequired()) {
+const eventData = getAllEventData();
+
+if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
-const eventData = getAllEventData();
 const eventNameData = getEventNameData();
 const eventName = eventNameData.e_n;
 let postUrl = data.trackingUrl;
@@ -288,7 +289,7 @@ function getMatomoParams(eventNameData) {
   Helpers
 ==============================================================================*/
 
-function isConsentGivenOrNotRequired() {
+function isConsentGivenOrNotRequired(data, eventData) {
   if (data.analyticsStorageConsent !== 'required') return true;
   if (eventData.consent_state) return !!eventData.consent_state.analytics_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110": G1{ad_storage}{analytics_storage}
