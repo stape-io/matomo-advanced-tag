@@ -35,3 +35,6 @@ Types of actions that server-side Matomo tag supports:
 ## Open Source
 
 Matomo Advanced Tag for GTM Server Side is developed and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
+
+### GTM Gallery Status
+🟢 [Listed](https://tagmanager.google.com/gallery/#/owners/stape-io/templates/matomo-advanced-tag)
