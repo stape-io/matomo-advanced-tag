@@ -28,10 +28,9 @@ Types of actions that server-side Matomo tag supports:
 
 **Request Headers** - Add the request headers name and value you want to add to the Matomo requests.
 
-**Logs Settings** - Specify whether the tag should write to the logs to stape.
+## Useful Resources
+- https://stape.io/blog/matomo-tag-for-server-google-tag-manager
 
-## Useful link:
-- https://stape.io/blog/matomo-tag-for-server-google-tag-manager 
 ## Open Source
 
 Matomo Advanced Tag for GTM Server Side is developed and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.

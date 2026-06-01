@@ -246,35 +246,6 @@ ___TEMPLATE_PARAMETERS___
         "defaultValue": "optional"
       }
     ]
-  },
-  {
-    "type": "GROUP",
-    "name": "logSettingsGroup",
-    "displayName": "Logs Settings",
-    "groupStyle": "ZIPPY_CLOSED",
-    "subParams": [
-      {
-        "type": "RADIO",
-        "name": "logType",
-        "displayName": "",
-        "radioItems": [
-          {
-            "value": "no",
-            "displayValue": "Do not log"
-          },
-          {
-            "value": "debug",
-            "displayValue": "Log to console during debug and preview"
-          },
-          {
-            "value": "always",
-            "displayValue": "Always log to console"
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "debug"
-      }
-    ]
   }
 ]
 
@@ -283,11 +254,8 @@ ___SANDBOXED_JS_FOR_SERVER___
 
 const encodeUriComponent = require('encodeUriComponent');
 const getAllEventData = require('getAllEventData');
-const getContainerVersion = require('getContainerVersion');
-const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const JSON = require('JSON');
-const logToConsole = require('logToConsole');
 const Object = require('Object');
 const sendHttpRequest = require('sendHttpRequest');
 const sha256Sync = require('sha256Sync');
@@ -301,10 +269,7 @@ if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
-const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = isLoggingEnabled ? getRequestHeader('trace-id') : undefined;
 const eventNameData = getEventNameData();
-const eventName = eventNameData.e_n;
 let postUrl = data.trackingUrl;
 const params = getMatomoParams(eventNameData);
 
@@ -335,38 +300,11 @@ if (data.requestHeaders && data.requestHeaders.length) {
   });
 }
 
-if (isLoggingEnabled) {
-  logToConsole(
-    JSON.stringify({
-      Name: 'MatomoAdvancedTag',
-      Type: 'Request',
-      TraceId: traceId,
-      EventName: eventName,
-      RequestMethod: 'POST',
-      RequestUrl: postUrl,
-      RequestHeaders: headers
-    })
-  );
-}
-
 sendHttpRequest(postUrl, {
   headers: headers,
   method: 'POST'
 })
   .then((response) => {
-    if (isLoggingEnabled) {
-      logToConsole(
-        JSON.stringify({
-          Name: 'MatomoAdvancedTag',
-          Type: 'Response',
-          TraceId: traceId,
-          EventName: eventName,
-          ResponseStatusCode: response.statusCode,
-          ResponseHeaders: response.headers,
-          ResponseBody: response.body
-        })
-      );
-    }
     if (!data.useOptimisticScenario) {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         data.gtmOnSuccess();
@@ -572,17 +510,16 @@ function getMatomoParams(eventNameData) {
   Helpers
 ==============================================================================*/
 
-function isConsentGivenOrNotRequired() {
+function isConsentGivenOrNotRequired(data, eventData) {
   if (data.analyticsStorageConsent !== 'required') return true;
   if (eventData.consent_state) return !!eventData.consent_state.analytics_storage;
-  // x-ga-gcs is a string like "G110": G1{ad_storage}{analytics_storage}
-  const xGaGcs = eventData['x-ga-gcs'] || ''; 
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110": G1{ad_storage}{analytics_storage}
   return xGaGcs[3] === '1';
 }
 
 function isValidParam(value) {
   const valueType = getType(value);
-  return valueType !== 'undefined' && valueType !== 'null' && value !== '';
+  return valueType !== 'undefined' && valueType !== 'null' && value !== '' && value === value;
 }
 
 function objectToQueryString(obj) {
@@ -591,128 +528,10 @@ function objectToQueryString(obj) {
     .join('&');
 }
 
-function determinateIsLoggingEnabled() {
-  const containerVersion = getContainerVersion();
-  const isDebug = !!(
-    containerVersion &&
-    (containerVersion.debugMode || containerVersion.previewMode)
-  );
-
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
-}
-
 
 ___SERVER_PERMISSIONS___
 
 [
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_request",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "headerWhitelist",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 3,
-                "mapKey": [
-                  {
-                    "type": 1,
-                    "string": "headerName"
-                  }
-                ],
-                "mapValue": [
-                  {
-                    "type": 1,
-                    "string": "trace-id"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "key": "headersAllowed",
-          "value": {
-            "type": 8,
-            "boolean": true
-          }
-        },
-        {
-          "key": "requestAccess",
-          "value": {
-            "type": 1,
-            "string": "specific"
-          }
-        },
-        {
-          "key": "headerAccess",
-          "value": {
-            "type": 1,
-            "string": "specific"
-          }
-        },
-        {
-          "key": "queryParameterAccess",
-          "value": {
-            "type": 1,
-            "string": "any"
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "all"
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_container_data",
-        "versionId": "1"
-      },
-      "param": []
-    },
-    "isRequired": true
-  },
   {
     "instance": {
       "key": {
@@ -772,6 +591,8 @@ setup: |-
 
 ___NOTES___
 
-Created on 07/03/2023, 14:08:00
+2026-05-25 Change Notes:
+ - Logging removal.
 
+Created on 07/03/2023, 14:08:00
 
